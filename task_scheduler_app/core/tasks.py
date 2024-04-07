@@ -7,6 +7,11 @@ from task_scheduler_app.celery import app
 # Implement task retry
 
 @shared_task
+@app.task(priority=10)
+# @app.apply_async(queue="your_queue_that_can_handle_priority", priority=10) 
+# Priority isn't natively unsuported by Redis unlike RabbitMQ : 
+# https://docs.celeryq.dev/en/latest/userguide/routing.html#redis-message-priorities
+# https://docs.celeryq.dev/en/stable/history/whatsnew-3.0.html#redis-priority-support
 def test_celery_task():
     logger.info("Core Task test_celery_task : Executing Celery task to print numbers from 0 to 4...")
     for i in range(5):
@@ -27,6 +32,7 @@ def random_success_task():
         return "Task succeeded."
     
 @shared_task
+@app.task(queue='big_tasks')
 def io_intensive_task():
     start_time = time.time()
 
@@ -49,6 +55,7 @@ def io_intensive_task():
     return "Task completed."
 
 @shared_task
+@app.task(queue='repetitive_tasks')
 def short_task():
     logger.info("Core Task short_task : Executing Celery task to test random success...")
     random_value = random.random()

@@ -26,8 +26,8 @@ rm -rf celerybeat.pid ./celery-worker-worker1.pid ./celery-worker-worker2.pid ./
 # run the workers in background
 nohup celery -A task_scheduler_app worker --pool=gevent --concurrency=8 -l debug  --autoscale=5,3 --without-gossip -E -n worker1@%h --pidfile ./celery-worker-%n.pid --logfile logs/worker-%n.txt &
 nohup celery -A task_scheduler_app worker --pool=gevent --concurrency=8 -l debug  --autoscale=5,3 --without-gossip -E -n worker2@%h --pidfile ./celery-worker-%n.pid --logfile logs/worker-%n.txt &
-nohup celery -A task_scheduler_app worker --pool=gevent --concurrency=8 -l debug  --autoscale=5,3 --without-gossip -E -n worker3@%h --pidfile ./celery-worker-%n.pid --logfile logs/worker-%n.txt &
-nohup celery -A task_scheduler_app worker --pool=gevent --concurrency=8 -l debug  --autoscale=5,3 --without-gossip -E -n worker4@%h --pidfile ./celery-worker-%n.pid --logfile logs/worker-%n.txt &
+nohup celery -A task_scheduler_app worker --pool=gevent --concurrency=8 -l debug  --autoscale=5,3 --without-gossip -Q big_tasks -E -n worker3@%h --pidfile ./celery-worker-%n.pid --logfile logs/worker-%n.txt &
+nohup celery -A task_scheduler_app worker --pool=gevent --concurrency=8 -l debug  --autoscale=5,3 --without-gossip -Q repetitive_tasks -E -n worker4@%h --pidfile ./celery-worker-%n.pid --logfile logs/worker-%n.txt &
 
 # run the scheduler in background
 nohup celery -A task_scheduler_app beat -l debug --scheduler django_celery_beat.schedulers:DatabaseScheduler --logfile logs/beat.txt &

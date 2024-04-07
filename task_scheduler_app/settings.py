@@ -181,6 +181,27 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_WORKER_SEND_TASK_EVENTS = True
 CELERY_TASK_SEND_SENT_EVENT = True
 
+# CELERY QUEUES AND ROUTINGS CONFIGURATION
+CELERY_QUEUES = {
+    'big_tasks': {'exchange': 'big_tasks', 'routing_key': 'big_tasks'},
+    'repetitive_tasks': {'exchange': 'repetitive_tasks', 'routing_key': 'repetitive_tasks'},
+}
+
+CELERY_ROUTES =  ([
+    ('task_scheduler_app.core.tasks.io_intensive_task', {'queue': 'big_tasks', 'exchange': 'big_tasks'}),
+    ('task_scheduler_app.core.tasks.short_task', {'queue': 'repetitive_tasks', 'exchange': 'repetitive_tasks'})
+    # ('feed.tasks.*', {'queue': 'feeds'}),
+    # ('web.tasks.*', {'queue': 'web'}),
+    # (re.compile(r'(video|image)\.tasks\..*'), {'queue': 'media'}),
+],)
+
+# CELERY PRIORITY CONFIGURATION
+BROKER_TRANSPORT_OPTIONS = {
+    'priority_steps': list(range(10)),
+    'sep': ':',
+    'queue_order_strategy': 'priority',
+}
+
 # Add a timeout to all Celery tasks.
 CELERY_TASK_TIME_LIMIT = 10 * 60
 
