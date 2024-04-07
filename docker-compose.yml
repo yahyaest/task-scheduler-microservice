@@ -1,0 +1,103 @@
+version: "3"
+services:
+
+  task_scheduler:
+    container_name: 'task_scheduler'
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=psql://postgres:postgres@postgres:5432/task-scheduler
+    command: sh -c "./entrypoint.sh"
+    ports:
+      - 5000:5000
+      - 5001:5001
+    depends_on:
+      - postgres
+    volumes:
+      - .:/code
+    networks:
+      - task-scheduler-app-networks
+
+  # gateway:
+  #   image: yahyamachat/gateway:0.4
+  #   container_name: gateway
+  #   restart: unless-stopped
+  #   ports:
+  #     - 4000:3000
+  #   networks:
+  #     - task-scheduler-app-networks
+  #   environment:
+  #     - BASE_URL=http://localhost:4000
+  #     - TZ=Africa/Tunis
+  #   depends_on:
+  #     - postgres
+  #   env_file:
+  #     - Gateway/.env
+  #   volumes:
+  #     - ./Gateway/uploads:/app/uploads
+
+  postgres:
+    image: postgres:14.8
+    container_name: postgres
+    restart: unless-stopped
+    # user: postgres
+    ports:
+      - 5433:5432
+    networks:
+      - task-scheduler-app-networks
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=task-scheduler
+    volumes:
+      - postgres-task-scheduler-app:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    ports:
+      - 9095:8080
+    networks:
+      - task-scheduler-app-networks
+    restart: unless-stopped
+
+  redis:
+    image: "redis:alpine"
+    container_name: redis
+    networks:
+      - task-scheduler-app-networks
+
+  redisinsight:
+    image: redislabs/redisinsight:1.14.0
+    container_name: redisinsight
+    ports:
+      - 6001:8001
+    volumes:
+      - ./redisinsight:/db 
+    networks:
+      - task-scheduler-app-networks
+  # sudo chmod -R 777 redisinsight/
+
+  celery-flower:
+    image: mher/flower
+    container_name: celery_flower
+    command: celery flower --persisten=True
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379
+      - FLOWER_UNAUTHENTICATED_API=true
+      - FLOWER_PORT=8888
+    ports:
+      - 8888:8888
+    volumes:
+      - ./flower_data:/data
+    networks:
+      - task-scheduler-app-networks
+  
+  
+volumes:
+  postgres-task-scheduler-app:
+
+networks:
+  task-scheduler-app-networks:
