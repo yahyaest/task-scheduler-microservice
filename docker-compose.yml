@@ -139,6 +139,34 @@ services:
     networks:
       - task-scheduler-app-networks
   
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node_exporter
+    # ports:
+    #   - 9100:9100    # commented for security reasons
+    restart: unless-stopped
+    command:
+      - '--path.rootfs=/host'
+    pid: host
+    volumes:
+      - /:/rootfs:ro,rslave
+    networks:
+      - task-scheduler-app-networks
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    # ports:
+    # - 8080:8080    # commented for security reasons
+    volumes:
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
+    depends_on:
+    - redis
+    networks:
+      - task-scheduler-app-networks
   
 volumes:
   postgres-task-scheduler-app:
