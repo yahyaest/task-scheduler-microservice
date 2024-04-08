@@ -1,4 +1,4 @@
-from store_app.api.middleware.auth_middleware import JWTAuthMiddleware
+from task_scheduler_app.api.middleware.auth_middleware import JWTAuthMiddleware
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 

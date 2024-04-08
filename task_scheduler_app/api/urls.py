@@ -1,6 +1,9 @@
 from django.urls import path
-from task_scheduler_app.api import views
+from rest_framework_nested import routers
+from .views import TaskViewSet
 
+router = routers.DefaultRouter()
 
-urlpatterns = [
-]
+router.register('tasks', TaskViewSet, basename='tasks')
+
+urlpatterns = router.urls

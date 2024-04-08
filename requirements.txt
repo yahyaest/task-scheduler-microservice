@@ -10,6 +10,7 @@ charset-normalizer==3.3.2
 coloredlogs==15.0.1
 colorlog==6.7.0
 constantly==23.10.4
+cron-descriptor==1.2.24
 cryptography==42.0.5
 Django==4.2.6
 django-celery-beat==2.1.0
