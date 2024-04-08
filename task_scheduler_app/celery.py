@@ -22,22 +22,22 @@ app.conf.beat_schedule = {
         'task': 'celery.backend_cleanup',
         'schedule':120, # 2 minutes
     },
-    'backend_test': {
-        'task': 'task_scheduler_app.core.tasks.test_celery_task',
-        'schedule': 60, # 1 minute
-    },
-    'random_success_task': {
-        'task': 'task_scheduler_app.core.tasks.random_success_task',
-        'schedule': 30, # 30 seconds
-    },
-    'io_intensive_task': {
-        'task': 'task_scheduler_app.core.tasks.io_intensive_task',
-        'schedule': 120, # 2 minutes
-    }, 
-    'short_task': {
-        'task': 'task_scheduler_app.core.tasks.short_task',
-        'schedule': 5, # 5 seconds
-    }, 
+    # 'backend_test': {
+    #     'task': 'task_scheduler_app.core.tasks.test_celery_task',
+    #     'schedule': 60, # 1 minute
+    # },
+    # 'random_success_task': {
+    #     'task': 'task_scheduler_app.core.tasks.random_success_task',
+    #     'schedule': 30, # 30 seconds
+    # },
+    # 'io_intensive_task': {
+    #     'task': 'task_scheduler_app.core.tasks.io_intensive_task',
+    #     'schedule': 120, # 2 minutes
+    # }, 
+    # 'short_task': {
+    #     'task': 'task_scheduler_app.core.tasks.short_task',
+    #     'schedule': 5, # 5 seconds
+    # }, 
 }
 
 @app.task(bind=True, ignore_result=True)
