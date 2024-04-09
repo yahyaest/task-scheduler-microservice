@@ -38,6 +38,7 @@ logs/**
 flower_data/**
 prometheus/**
 redisinsight/**
+Gateway/**
 Docs/**
 
 # PyCharm

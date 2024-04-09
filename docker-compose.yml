@@ -15,28 +15,29 @@ services:
       - 5001:5001
     depends_on:
       - postgres
+      - redis
     volumes:
       - .:/code
     networks:
       - task-scheduler-app-networks
 
-  # gateway:
-  #   image: yahyamachat/gateway:0.4
-  #   container_name: gateway
-  #   restart: unless-stopped
-  #   ports:
-  #     - 4000:3000
-  #   networks:
-  #     - task-scheduler-app-networks
-  #   environment:
-  #     - BASE_URL=http://localhost:4000
-  #     - TZ=Africa/Tunis
-  #   depends_on:
-  #     - postgres
-  #   env_file:
-  #     - Gateway/.env
-  #   volumes:
-  #     - ./Gateway/uploads:/app/uploads
+  gateway:
+    image: yahyamachat/gateway:0.4
+    container_name: gateway
+    restart: unless-stopped
+    ports:
+      - 4000:3000
+    networks:
+      - task-scheduler-app-networks
+    environment:
+      - BASE_URL=http://localhost:4000
+      - TZ=Africa/Tunis
+    depends_on:
+      - postgres
+    env_file:
+      - Gateway/.env
+    volumes:
+      - ./Gateway/uploads:/app/uploads
 
   postgres:
     image: postgres:14.8
