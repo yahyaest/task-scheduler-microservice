@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'django_filters',
     'multiselectfield',
     'rest_framework',
+    'template_partials',
     'task_scheduler_app.core',
     'task_scheduler_app.api'
 ]

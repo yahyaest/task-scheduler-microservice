@@ -1,0 +1,97 @@
+{% extends 'base.html' %} 
+{% load custom_filters %} 
+{% block title%}Tasks{% endblock %} 
+{%block content %}
+<div class="text-center mx-auto md:p-16">
+  {% include 'partials/create_task.html' %}
+  {% if tasks  and tasks|list_length > 0 %}
+    <h1 class="text-center text-error text-3xl font-bold my-5">{{tasks|list_length}} Tasks</h1>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Task Type</th>
+          <th>Status</th>
+          <th>Is Periodic</th>
+          <th>Cron Expression</th>
+          <th>Total Run Count</th>
+          <th>Is Active</th>
+          <th>Begin At</th>
+          <th>End At</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for task in tasks %}
+        <tr>
+          <td>{{task.name}}</td>
+          <td>{{task.description}}</td>
+          <td>{{task.task_type}}</td>
+          <td>
+            {% if task.status == 'PENDING' %}
+              <div class="badge badge-md badge-info gap-2">{{task.status}}</div>
+            {% elif task.status == 'SUCCESS' %}
+              <div class="badge badge-md badge-success gap-2">{{task.status}}</div>
+            {% elif task.status == 'IN_PROGRESS' %}
+              <div class="badge badge-md badge-warning gap-2">{{task.status}}</div>
+            {% elif task.status == 'FAILED' %}
+              <div class="badge badge-md badge-error gap-2">{{task.status}}</div>
+            {% endif %}
+          </td>
+          <td>
+            <input type="checkbox" class="checkbox" disabled {% if not task.periodic_task.one_off %}checked{% endif %} />
+          </td>
+          <td>{{task.cron_expression}}</td>
+          <td>{{task.periodic_task.total_run_count}}</td>
+          <td>
+            <input type="checkbox" class="checkbox" disabled {% if task.enabled %}checked{% endif %} />
+          </td>
+          <td>{{task.begin_date}}</td>
+          <td>{{task.end_date}}</td>
+          <td>
+            <div class="join">
+              <div>
+                <form method="POST" action="{% url 'restart_task' %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="task_id" value="{{ task.id }}">
+                  <button class="btn btn-square btn-sm join-item">
+                    <i class="fa fa-refresh" aria-hidden="true"></i>
+                  </button>
+                </form>
+              </div>             
+              <div>
+                <form method="POST" action="{% url 'disable_or_enable_task' %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="task_id" value="{{ task.id }}">
+                  <button class="btn btn-square btn-sm join-item">
+                    <i class="fa-solid {% if task.enabled %}fa-pause {% else %}fa-play {% endif %}"></i>
+                  </button>
+                </form>
+              </div>
+              <div>
+                <form method="POST" action="{% url 'delete_task' %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="task_id" value="{{ task.id }}">
+                  <button class="btn btn-square btn-sm join-item">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% comment %} Pagination {% endcomment %}
+    <div class="join my-5">
+      {% for i in page_range %} 
+        <input class="join-item btn btn-square" type="radio" name="options" aria-label="{{i}}" onclick="location.href='?page={{ i }}';" {% if i == current_page %}checked{% endif %} />
+      {% endfor %}
+    </div>
+  {%else%}
+    <h1 class="text-center text-error text-3xl font-bold my-5">0 Task</h1>
+  {% endif %}
+</div>
+{% endblock %}
