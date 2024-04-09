@@ -157,7 +157,7 @@ class TaskSerializer(serializers.ModelSerializer):
             if enabled is not None:
                 task.enabled = validated_data['enabled']
             
-                        # Update name field on related celery task (PeriodicTask)
+            # Update name field on related celery task (PeriodicTask)
             if validated_data.get('name', None):
                 random_name = "original_name:%s, random:%s" % (validated_data['name'], str(uuid.uuid4()))
                 task.name = random_name
@@ -207,8 +207,7 @@ class TaskSerializer(serializers.ModelSerializer):
                 task.kwargs = json.dumps(json_kwargs)
 
             task.save()
-
-            instance.save()
+            instance = super(TaskSerializer, self).update(instance, validated_data)
             return instance
         
         except Exception as e:
