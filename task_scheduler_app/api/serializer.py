@@ -5,6 +5,7 @@ import importlib
 import traceback
 from django.utils.text import slugify
 from django.utils import timezone
+from django.conf import settings
 from django_celery_beat.models import PeriodicTask, IntervalSchedule, CrontabSchedule, ClockedSchedule
 from django_celery_beat.utils import make_aware
 from django_celery_results.models import TaskResult
@@ -59,11 +60,20 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def verify_task_exists(self, task_type):
         try:
+            # Check if the task exists in the tasks module
             module = importlib.import_module('task_scheduler_app.api.tasks')
             if hasattr(module, task_type):
                 return True
-            else:
-                return False
+            
+            # Check if the task exists in the settings TASKS environment variable
+            env_tasks = settings.CELERY_WORKER_TASKS.split(",")
+            for task in env_tasks:
+                env_task = slugify(task).replace("-", "_")
+                if env_task == task_type:
+                    return True
+                break
+                
+            return False
         except Exception as e:
             logger.error(f"Error : {e}")
             logger.error(traceback.format_exc())  

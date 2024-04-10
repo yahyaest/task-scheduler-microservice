@@ -9,6 +9,14 @@ services:
     restart: unless-stopped
     environment:
       - DATABASE_URL=psql://postgres:postgres@postgres:5432/task-scheduler
+      - CELERY_WORKER_TASKS=purge_task_results,purge_celrery_workers_logs,tasks_stats,periodic_tasks_stats
+      - CELERY_WORKER_PROJECT_NAME=task_scheduler_app
+      - CELERY_WORKER_CONCURRENCY=8
+      - CELERY_WORKER_AUTOSCALE=5,3
+      - CELERY_WORKERS_COUNT=3
+      - CELERY_WORKERS_QUEUES=queued_tasks
+      - CELERY_WORKER_LOG_LEVEL=debug
+
     command: sh -c "./entrypoint.sh"
     ports:
       - 5000:5000
@@ -18,6 +26,7 @@ services:
       - redis
     volumes:
       - .:/code
+      - ./external_tasks.py:/code/task_scheduler_app/api/tasks.py
     networks:
       - task-scheduler-app-networks
 
