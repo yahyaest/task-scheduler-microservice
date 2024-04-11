@@ -1,0 +1,108 @@
+{% load partials %}
+{% load custom_filters %} 
+
+{% if task_operation == 'create'%}
+<button class="btn btn-warning float-right my-1" onclick="my_modal_create_task.showModal()">
+  <i class="fa-solid fa-plus"></i>
+  Create Task
+</button>
+{% endif %}
+
+{% if task_operation == 'edit'%}
+<button 
+  class="btn btn-square btn-sm join-item" 
+  onclick="
+    my_modal_edit_task_{{task.id}}.showModal(); 
+    populateEditTaskForm({
+      id: '{{task.id}}',
+      name: '{{task.name}}', 
+      description: '{{task.description}}', 
+      task_type: '{{task.task_type}}', 
+      cron_expression: '{{task.cron_expression}}', 
+      retry_number: '{{task.retry_number}}'
+    })
+  "
+  >
+  <i class="fa-solid fa-pen-to-square"></i>
+</button>
+{% endif %}
+
+<dialog id="{%if task_operation == 'create' %}my_modal_create_task{% else %}my_modal_edit_task_{{task.id}}{% endif %}" class="modal">
+  <form class="modal-box" method="post" action="{% if task_operation == 'create' %}{% url 'create_task' %}{% else %}{% url 'edit_task' task_id=task.id %}{% endif %}" >
+    {% csrf_token %}
+    <h1 class="text-center text-info text-xl font-bold my-5">
+      {%if task_operation == 'create' %}
+        Create New Task
+      {% else %}
+        Edit Task {{ task.name }}
+      {% endif %}
+    </h1>
+    <div class="flex flex-row justify-center align-middle space-x-2 my-5">
+      <div class= "w-32">{{ form.name.label_tag }}</div>
+      <div id="{%if task_operation == 'edit' %}task-{{task.id}}-name{% endif %}">
+        {{ form.name }}
+      </div>
+    </div>
+    <div class="flex flex-row justify-center align-middle space-x-2 my-5">
+      <div class= "w-32">{{ form.description.label_tag }}</div>
+      <div id="{%if task_operation == 'edit' %}task-{{task.id}}-description{% endif %}">
+        {{ form.description }}
+      </div>
+    </div>
+    <div class="flex flex-row justify-center align-middle text-center space-x-2 my-5">
+      <div class= "w-32">{{ form.task_type.label_tag }}</div>
+      <div id="{%if task_operation == 'edit' %}task-{{task.id}}-task_type{% endif %}">
+        {{ form.task_type }}
+      </div>
+    </div>
+    <div class="flex flex-row justify-center align-middle text-center space-x-2 my-5">
+      <div class= "w-32">{{ form.cron_expression.label_tag }}</div>
+      <div id="{%if task_operation == 'edit' %}task-{{task.id}}-cron_expression{% endif %}">
+        {{ form.cron_expression }}
+      </div>
+    </div>
+    <div class="flex flex-row justify-center align-middle text-center space-x-2 my-5">
+      <div class= "w-32">{{ form.retry_number.label_tag }}</div>
+      <div id="{%if task_operation == 'edit' %}task-{{task.id}}-retry_number{% endif %}">
+        {{ form.retry_number }}
+      </div>
+    </div>
+    {% comment %} 
+      <div class="flex flex-row justify-start align-middle text-center space-x-2 my-5 ml-8">
+        <div class= "w-32">{{ form.enabled.label_tag }}</div>
+        {{ form.enabled }}
+      </div> 
+    {% endcomment %}
+
+    <div class="flex flex-row justify-end w-full mt-2 px-1 space-x-2">
+      <button type="submit" class="btn btn-primary">Submit</button>
+      <button 
+        type="button" 
+        class="btn btn-error" 
+        onclick="{%if task_operation == 'create' %} my_modal_create_task.close() {% else %} my_modal_edit_task_{{task.id}}.close() {% endif %}"
+        >
+          Close
+      </button>
+    </div>
+  </form>
+
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
+
+{% block scripts%}
+<script>
+    function populateEditTaskForm(task){
+      const taskOperation ="{{task_operation}}"
+      if(taskOperation == "edit"){
+        console.log("task is :", task)
+        document.querySelector(`#task-${task.id}-name input`).value = task.name;
+        document.querySelector(`#task-${task.id}-description input`).value = task.description;
+        document.querySelector(`#task-${task.id}-task_type input`).value = task.task_type;
+        document.querySelector(`#task-${task.id}-cron_expression input`).value = task.cron_expression;
+        document.querySelector(`#task-${task.id}-retry_number input`).value = task.retry_number;
+      }
+    }
+</script>
+{% endblock %}

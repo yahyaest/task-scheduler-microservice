@@ -158,6 +158,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         try:
+            logger.info(f"Updating Task {instance.id} with data : {validated_data}")
             # Get the celery task (PeriodicTask)
             celery_task_id = instance.periodic_task
             task = PeriodicTask.objects.get(pk=celery_task_id)

@@ -2,7 +2,7 @@ import json
 import math
 from django.db.models import Case, When
 from django.db import models
-from django.shortcuts import render, HttpResponse, HttpResponseRedirect
+from django.shortcuts import render, get_object_or_404, HttpResponse, HttpResponseRedirect
 from django.views.decorators.http import require_POST
 from django import forms
 from django.core.paginator import Paginator
@@ -144,6 +144,7 @@ def tasks_page(request):
         cookies = getUserToken(request)
         if cookies:
             token=cookies.get('token', None)
+            user = cookies.get('user', None)
         
         if token is None:
             return HttpResponseRedirect('/login')
@@ -160,7 +161,7 @@ def tasks_page(request):
         #     END,
         #     last_update DESC;
 
-        tasks_list = Task.objects.all().order_by(
+        tasks_list = Task.objects.all().filter(user=user.get('email', None)).order_by(
             Case(
                 When(last_update__isnull=True, then=1),
                 default=0,
@@ -168,6 +169,7 @@ def tasks_page(request):
             ),
             '-last_update'
         )
+        tasks_count = tasks_list.count()
 
         for task in tasks_list:
             try:
@@ -192,6 +194,7 @@ def tasks_page(request):
             template_name='tasks.html',
             context={
                 'tasks': tasks, 
+                'tasks_count': tasks_count,
                 'page_range': page_range, 
                 'current_page': int(page_number),
                 'form': create_task_form
@@ -242,7 +245,7 @@ def restart_task(request):
                 'cron_expression': task_to_restart.cron_expression,
                 'retry_number': task_to_restart.retry_number,
                 'enabled': True,
-                'user': user.get('id', None),
+                'user': user.get('email', None),
                 'args': task_to_restart.args
             }
             serializer = TaskSerializer(data=serializer_data)
@@ -274,28 +277,69 @@ def delete_task(request):
 
 @require_POST
 def create_task(request):
-    token = None
-    user =  None
-    cookies = getUserToken(request)
-    if cookies:
-        token=cookies.get('token', None)
-        user = cookies.get('user', None)
+    try:
+        logger.info(f"Creating Task View")
+        token = None
+        user =  None
+        cookies = getUserToken(request)
+        if cookies:
+            token=cookies.get('token', None)
+            user = cookies.get('user', None)
 
-    form = TaskForm(request.POST)
-    if form.is_valid():
-        if token and user:
-            # Create Task
-            user_id = user.get('id', None)
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            if token and user:
+                # Create Task
+                user_email = user.get('email', None)
 
-            serializer_data = request.POST.copy()
-            serializer_data['enabled'] = True
-            serializer_data['user'] = user_id
+                serializer_data = request.POST.copy()
+                serializer_data['enabled'] = True
+                serializer_data['user'] = user_email
 
-            serializer = TaskSerializer(data=serializer_data)
-            if serializer.is_valid():
-                serializer.save()
+                serializer = TaskSerializer(data=serializer_data)
+                if serializer.is_valid():
+                    serializer.save()
 
+                return HttpResponseRedirect('/tasks')
+            else:
+                logger.error(f"Token or user not found")
+                return HttpResponseRedirect('/tasks')
+        else:
+            logger.error(f"Form not valid : {form.errors}")
+            return HttpResponseRedirect('/tasks')
+    except Exception as e:
+        logger.error(f"Error in create_task view : {e}")
         return HttpResponseRedirect('/tasks')
-    else:
-        logger.error(f"Form not valid : {form.errors}")
-        return HttpResponseRedirect('/')
+
+@require_POST
+def edit_task(request, task_id):
+    try:
+        logger.info(f"Edit Task with id {{task_id}} View ")
+        token = None
+        cookies = getUserToken(request)
+        if cookies:
+            token=cookies.get('token', None)
+        
+        if token is None:
+            return HttpResponseRedirect('/login')
+
+        task = get_object_or_404(Task, id=task_id)
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            if token:
+                serializer_data = request.POST.copy()
+                serializer_data['enabled'] = task.enabled
+                logger.info(f"Serializer Edit data : {serializer_data}")
+                serializer = TaskSerializer(task, data=serializer_data)  # Pass the task instance here
+                if serializer.is_valid():
+                    serializer.save()
+                return HttpResponseRedirect('/tasks')
+            else:
+                logger.error(f"Token not found")
+                return HttpResponseRedirect('/tasks')
+        else:
+            logger.error(f"Form not valid : {form.errors}")
+            return HttpResponseRedirect('/tasks')
+    except Exception as e:
+        logger.error(f"Error in edit_task view : {e}")
+        return HttpResponseRedirect('/tasks')

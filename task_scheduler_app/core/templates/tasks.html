@@ -3,20 +3,22 @@
 {% block title%}Tasks{% endblock %} 
 {%block content %}
 <div class="text-center mx-auto md:p-16">
-  {% include 'partials/create_task.html' %}
-  {% if tasks  and tasks|list_length > 0 %}
-    <h1 class="text-center text-error text-3xl font-bold my-5">{{tasks|list_length}} Tasks</h1>
+  {% include 'partials/create_or_edit_task.html' with task_operation='create' %}
+  {% if tasks  and tasks_count > 0 %}
+    <h1 class="text-center text-error text-3xl font-bold my-5">{{tasks_count}} Tasks</h1>
     <table class="table">
       <thead>
         <tr>
           <th>Name</th>
           <th>Description</th>
+          <th>Created By</th>
           <th>Task Type</th>
           <th>Status</th>
           <th>Is Periodic</th>
           <th>Cron Expression</th>
           <th>Total Run Count</th>
           <th>Is Active</th>
+          <th>Retry Number</th>
           <th>Begin At</th>
           <th>End At</th>
           <th></th>
@@ -27,6 +29,7 @@
         <tr>
           <td>{{task.name}}</td>
           <td>{{task.description}}</td>
+          <td>{{task.user}}</td>
           <td>{{task.task_type}}</td>
           <td>
             {% if task.status == 'PENDING' %}
@@ -47,11 +50,12 @@
           <td>
             <input type="checkbox" class="checkbox" disabled {% if task.enabled %}checked{% endif %} />
           </td>
+          <td>{{task.retry_number}}</td>
           <td>{{task.begin_date}}</td>
           <td>{{task.end_date}}</td>
           <td>
             <div class="join">
-              <div>
+              <div class="tooltip" data-tip="restart">
                 <form method="POST" action="{% url 'restart_task' %}">
                   {% csrf_token %}
                   <input type="hidden" name="task_id" value="{{ task.id }}">
@@ -60,7 +64,7 @@
                   </button>
                 </form>
               </div>             
-              <div>
+              <div class="tooltip" data-tip="{% if task.enabled %}disable {% else %}enable {% endif %}">
                 <form method="POST" action="{% url 'disable_or_enable_task' %}">
                   {% csrf_token %}
                   <input type="hidden" name="task_id" value="{{ task.id }}">
@@ -69,7 +73,7 @@
                   </button>
                 </form>
               </div>
-              <div>
+              <div class="tooltip" data-tip="delete">
                 <form method="POST" action="{% url 'delete_task' %}">
                   {% csrf_token %}
                   <input type="hidden" name="task_id" value="{{ task.id }}">
@@ -78,7 +82,9 @@
                   </button>
                 </form>
               </div>
-            </div>
+              <div class="tooltip" data-tip="edit">
+                {% include 'partials/create_or_edit_task.html' with task_operation='edit' task=task %}
+              </div>
           </td>
         </tr>
       {% endfor %}
