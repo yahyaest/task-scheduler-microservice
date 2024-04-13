@@ -8,11 +8,16 @@ scrape_configs:
       - targets: ['localhost:9090']
   - job_name: celery-exporter
     static_configs:
-      #- targets: ['celery-flower:8888'] # if you run flower config using docker else use localhost:5555
       - targets: ['celery-exporter:9808']
   - job_name: celery-flower-exporter
     static_configs:
       - targets: ['celery-flower:8888'] # if you run flower config using docker else use localhost:5555
+  - job_name: rabbitmq
+    static_configs:
+      - targets: ['rabbitmq:15692']
+  - job_name: rabbitmq-exporter
+    static_configs:
+      - targets: ['rabbitmq-exporter:9419']
   - job_name: node-exporter
     static_configs:
       - targets: ['node-exporter:9100']

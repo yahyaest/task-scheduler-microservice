@@ -16,6 +16,17 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 # Load task modules from all registered Django apps.
 app.autodiscover_tasks()
 
+# Celery task priority configuration
+# from kombu import Exchange, Queue
+
+# app.conf.task_queues = [
+#     Queue('celery', Exchange('celery'), routing_key='celery',queue_arguments={'x-max-priority': 10}),
+#     Queue('queued_tasks', Exchange('queued_tasks'), routing_key='queued_tasks',queue_arguments={'x-max-priority': 10}),
+#     Queue('prioritized_queued_tasks', Exchange('prioritized_queued_tasks'), routing_key='prioritized_queued_tasks',queue_arguments={'x-max-priority': 10}),
+# ]
+app.conf.task_queue_max_priority = 10
+app.conf.task_default_priority = 5
+
 # Celery Beat Configuration
 app.conf.beat_schedule = {
     'backend_cleanup': {

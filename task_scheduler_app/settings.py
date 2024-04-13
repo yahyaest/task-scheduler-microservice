@@ -36,12 +36,13 @@ CORS_ALLOW_ALL_ORIGINS = True
 env = environ.Env(
     DATABASE_URL=(str, 'psql://postgres:postgres@postgres:5432/task-scheduler'),
     GATEWAY_BASE_URL=(str, None),
-    CELERY_WORKER_TASKS=(str, None)
+    CELERY_WORKER_TASKS=(str, None),
+    CELERY_BROKER_URL=(str, 'redis://redis:6379'),
+    CELERY_RESULT_BACKEND=(str, 'redis://redis:6379')
 )
 
 DATABASE_URL = env('DATABASE_URL')
 GATEWAY_BASE_URL = env('GATEWAY_BASE_URL')
-CELERY_WORKER_TASKS = env('CELERY_WORKER_TASKS')
 
 # Application definition
 
@@ -173,12 +174,16 @@ REST_FRAMEWORK = {
 }
 
 # CELERY SETTINGS
-CELERY_BROKER_URL = 'redis://redis:6379'
-CELERY_RESULT_BACKEND = 'redis://redis:6379'
+
+# CELERY_BROKER_URL = 'redis://redis:6379'
+# CELERY_RESULT_BACKEND = 'redis://redis:6379'
+# CELERY_RESULT_BACKEND = 'django-db'
+CELERY_WORKER_TASKS = env('CELERY_WORKER_TASKS')
+CELERY_BROKER_URL = env('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND')
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_RESULT_BACKEND = 'django-db'
 CELERY_TASK_RESULT_EXPIRES = '60'  # 1 minute
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
@@ -186,31 +191,33 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_WORKER_SEND_TASK_EVENTS = True
 CELERY_TASK_SEND_SENT_EVENT = True
 
-# CELERY QUEUES AND ROUTINGS CONFIGURATION
-CELERY_QUEUES = {
-    'big_tasks': {'exchange': 'big_tasks', 'routing_key': 'big_tasks'},
-    'repetitive_tasks': {'exchange': 'repetitive_tasks', 'routing_key': 'repetitive_tasks'},
-}
+# # CELERY QUEUES AND ROUTINGS CONFIGURATION
+# CELERY_QUEUES = {
+#     'big_tasks': {'exchange': 'big_tasks', 'routing_key': 'big_tasks'},
+#     'repetitive_tasks': {'exchange': 'repetitive_tasks', 'routing_key': 'repetitive_tasks'},
+# }
 
-CELERY_ROUTES =  ([
-    ('task_scheduler_app.core.tasks.io_intensive_task', {'queue': 'big_tasks', 'exchange': 'big_tasks'}),
-    ('task_scheduler_app.core.tasks.short_task', {'queue': 'repetitive_tasks', 'exchange': 'repetitive_tasks'})
-    # ('feed.tasks.*', {'queue': 'feeds'}),
-    # ('web.tasks.*', {'queue': 'web'}),
-    # (re.compile(r'(video|image)\.tasks\..*'), {'queue': 'media'}),
-],)
+# CELERY_ROUTES =  ([
+#     ('task_scheduler_app.core.tasks.io_intensive_task', {'queue': 'big_tasks', 'exchange': 'big_tasks'}),
+#     ('task_scheduler_app.core.tasks.short_task', {'queue': 'repetitive_tasks', 'exchange': 'repetitive_tasks'})
+#     # ('feed.tasks.*', {'queue': 'feeds'}),
+#     # ('web.tasks.*', {'queue': 'web'}),
+#     # (re.compile(r'(video|image)\.tasks\..*'), {'queue': 'media'}),
+# ],)
 
 # CELERY PRIORITY CONFIGURATION
-BROKER_TRANSPORT_OPTIONS = {
-    'priority_steps': list(range(10)),
-    'sep': ':',
-    'queue_order_strategy': 'priority',
-}
+# BROKER_TRANSPORT_OPTIONS = {
+#     'priority_steps': list(range(10)),
+#     'sep': ':',
+#     'queue_order_strategy': 'priority',
+# }
 
 # Add a timeout to all Celery tasks.
 CELERY_TASK_TIME_LIMIT = 10 * 60
 
 CELERYD_PREFETCH_MULTIPLIER = 0
+# CELERY_ACKS_LATE = True
+# CELERYD_PREFETCH_MULTIPLIER = 1
 
 CELERY_COMPRESSION = 'gzip'
 CELERY_MESSAGE_COMPRESSION = 'gzip'

@@ -9,21 +9,25 @@ services:
     restart: unless-stopped
     environment:
       - DATABASE_URL=psql://postgres:postgres@postgres:5432/task-scheduler
-      - CELERY_WORKER_TASKS=purge_task_results,purge_celrery_workers_logs,tasks_stats,periodic_tasks_stats
+      # - CELERY_BROKER_URL=redis://redis:6379
+      # - CELERY_RESULT_BACKEND=redis://redis:6379
+      - CELERY_BROKER_URL=amqp://admin:admin@rabbitmq:5672
+      - CELERY_RESULT_BACKEND=django-db
+      - CELERY_WORKER_TASKS=purge_task_results,purge_celrery_workers_logs,tasks_stats,periodic_tasks_stats,low_priority_task,              medium_priority_task,high_priority_task,fibonacci_random_task
       - CELERY_WORKER_PROJECT_NAME=task_scheduler_app
       - CELERY_WORKER_CONCURRENCY=8
       - CELERY_WORKER_AUTOSCALE=5,3
-      - CELERY_WORKERS_COUNT=3
-      - CELERY_WORKERS_QUEUES=queued_tasks
+      - CELERY_WORKERS_COUNT=2
+      - CELERY_WORKERS_QUEUES=queued_tasks,prioritized_queued_tasks
       - CELERY_WORKER_LOG_LEVEL=debug
 
     command: sh -c "./entrypoint.sh"
     ports:
       - 5000:5000
-      - 5001:5001
     depends_on:
       - postgres
       - redis
+      - rabbitmq
     volumes:
       - .:/code
       - ./external_tasks.py:/code/task_scheduler_app/api/tasks.py
@@ -90,12 +94,37 @@ services:
       - task-scheduler-app-networks
   # sudo chmod -R 777 redisinsight/
 
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+      - 15692:15692
+    networks:
+      - task-scheduler-app-networks
+    environment:
+      RABBITMQ_DEFAULT_USER: "admin"
+      RABBITMQ_DEFAULT_PASS: "admin"
+
+  rabbitmq-exporter:
+    image: kbudde/rabbitmq-exporter
+    container_name: rabbitmq_exporter
+    restart: unless-stopped
+    ports:
+      - 9419:9419
+    volumes:
+      - ./rabbitmq_exporter/config.example.json:/conf/rabbitmq.conf
+    networks:
+      - task-scheduler-app-networks
+
   celery-flower:
     image: mher/flower
     container_name: celery_flower
     command: celery flower --persisten=True
     environment:
-      - CELERY_BROKER_URL=redis://redis:6379
+      # - CELERY_BROKER_URL=redis://redis:6379
+      - CELERY_BROKER_URL=amqp://admin:admin@rabbitmq:5672
       - FLOWER_UNAUTHENTICATED_API=true
       - FLOWER_PORT=8888
     ports:
@@ -111,7 +140,8 @@ services:
     ports:
       - "9808:9808"
     environment:
-      - CE_BROKER_URL=redis://redis:6379
+      # - CE_BROKER_URL=redis://redis:6379
+      - CE_BROKER_URL=amqp://admin:admin@rabbitmq:5672
     networks:
       - task-scheduler-app-networks
   
