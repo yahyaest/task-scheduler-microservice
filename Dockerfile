@@ -26,11 +26,12 @@ FROM python:3.11-alpine3.17
 COPY --from=0 /install /usr/local
 RUN apk --no-cache add libpq libstdc++ gcc libgcc linux-headers uwsgi uwsgi-python3
 
-RUN mkdir /code
-WORKDIR /code
 COPY requirements.txt /requirements.txt
 RUN pip install --upgrade pip
 
+RUN mkdir /code
+COPY . /code/
+WORKDIR /code
 
 # ENV PYTHONPATH=/code
 ENV PYTHONUNBUFFERED=0
@@ -41,5 +42,3 @@ ENV PYTHONUNBUFFERED=0
 CMD ["sh", "-c", "tail -f /dev/null"]
 # CMD ["python", "manage.py", "runserver", "0.0.0.0:5000"]
 
-
- 
