@@ -6,7 +6,7 @@ from django_celery_beat.models import PeriodicTask
 from task_scheduler_app.tools.helpers import logger
 from task_scheduler_app.decorators.task_decorator import task_autoretry
 from task_scheduler_app.api.models import Task
-from task_scheduler_app.celery import app
+# from task_scheduler_app.celery import app
 from celery import shared_task
 
 
@@ -152,9 +152,10 @@ def high_priority_task(self, *args, **kwargs):
         logger.error(f"Error executing high priority task: {e}")
         raise e
     
-@task_autoretry(bind=True)
+@task_autoretry(bind=True, broker_choice='rabbitmq')
 def fibonacci_random_task(self, *args, **kwargs):
     try:
+        logger.info(f"Executing task fibonacci_random_task, args: {args} kwargs: {kwargs}")
         logger.info(f"Executing task id {self.request.id}, args: {self.request.args!r} kwargs: {self.request.kwargs!r}")
         random_number = random.randint(40, 45)
         logger.info(f"Executing a Fibonacci task for n={random_number}")

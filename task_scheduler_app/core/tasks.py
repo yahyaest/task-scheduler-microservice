@@ -1,13 +1,26 @@
 import random
 import time
+from django.conf import settings
 from celery import shared_task
 from task_scheduler_app.tools.helpers import logger
-from task_scheduler_app.celery import app
+# from task_scheduler_app.celery import app
+
+use_redis_broker = settings.CELERY_USE_REDIS if hasattr(settings, 'CELERY_USE_REDIS') else False
+use_rabbitmq_broker = settings.CELERY_USE_RABBITMQ if hasattr(settings, 'CELERY_USE_RABBITMQ') else False
+
+current_app = None
+if  use_redis_broker:
+    from task_scheduler_app.celery import app
+    current_app = app
+if  use_rabbitmq_broker:
+    from task_scheduler_app.celery import rabbitmq_app
+    if not use_redis_broker:
+        current_app = rabbitmq_app
 
 # Implement task retry
 
 @shared_task
-@app.task(priority=10)
+@current_app.task(priority=10)
 # @app.apply_async(queue="your_queue_that_can_handle_priority", priority=10) 
 # Priority isn't natively unsuported by Redis unlike RabbitMQ : 
 # https://docs.celeryq.dev/en/latest/userguide/routing.html#redis-message-priorities
@@ -32,7 +45,7 @@ def random_success_task():
         return "Task succeeded."
     
 @shared_task
-@app.task(queue='big_tasks')
+@current_app.task(queue='big_tasks')
 def io_intensive_task():
     start_time = time.time()
 
@@ -55,7 +68,7 @@ def io_intensive_task():
     return "Task completed."
 
 @shared_task
-@app.task(queue='repetitive_tasks')
+@current_app.task(queue='repetitive_tasks')
 def short_task():
     logger.info("Core Task short_task : Executing Celery task to test random success...")
     random_value = random.random()

@@ -1,9 +1,30 @@
 import time, random, functools
 from datetime import datetime
 from django_celery_beat.models import PeriodicTask
+from django.conf import settings
 from task_scheduler_app.tools.helpers import logger
 from task_scheduler_app.api.models import Task
-from task_scheduler_app.celery import app
+# from task_scheduler_app.celery import app
+
+
+use_redis_broker = settings.CELERY_USE_REDIS if hasattr(settings, 'CELERY_USE_REDIS') else False
+use_rabbitmq_broker = settings.CELERY_USE_RABBITMQ if hasattr(settings, 'CELERY_USE_RABBITMQ') else False
+
+if  use_redis_broker:
+    from task_scheduler_app.celery import app
+if  use_rabbitmq_broker:
+    from task_scheduler_app.celery import rabbitmq_app
+    
+
+def get_celery_app(broker_choice):
+    if broker_choice == 'rabbitmq' and use_rabbitmq_broker:
+        return rabbitmq_app
+    elif broker_choice == 'redis' and use_redis_broker:
+        return app
+    elif use_rabbitmq_broker and not use_redis_broker:
+        return rabbitmq_app
+    else:
+        return app
 
 
 def get_tasks_from_kwargs(kwargs):
@@ -56,7 +77,12 @@ def task_autoretry(*args_task, **kwargs_task):
         current_task.save()
 
     def real_decorator(func):
-        @app.task(*args_task, **kwargs_task)
+        selected_app = get_celery_app(kwargs_task.get('broker_choice', None))
+        logger.info(f"Selected app : {selected_app} for task {func.__name__}")
+        logger.info(f"Task args_task in real_decorator : {args_task}")
+        logger.info(f"Task kwargs_task in real_decorator : {kwargs_task}")
+        # @app.task(*args_task, **kwargs_task)
+        @selected_app.task(*args_task, **kwargs_task)
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             logger.info(f"Task args_task : {args_task}")

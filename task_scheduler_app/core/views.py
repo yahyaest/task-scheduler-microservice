@@ -9,7 +9,7 @@ from django.core.paginator import Paginator
 from django_celery_beat.models import PeriodicTask
 from task_scheduler_app.api.models import Task
 from task_scheduler_app.api.serializer import TaskSerializer
-from task_scheduler_app.core.tasks import test_celery_task, io_intensive_task
+# from task_scheduler_app.core.tasks import test_celery_task, io_intensive_task
 from task_scheduler_app.tools.helpers import logger
 from task_scheduler_app.core.forms import DeleteTaskForm, LoginForm, RegisterForm, TaskForm, UpdateTaskForm
 from task_scheduler_app.clients.gateway import Gateway

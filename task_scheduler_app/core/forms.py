@@ -68,9 +68,9 @@ class TaskForm(forms.Form):
         widget=forms.TextInput(attrs={"class": "input input-bordered", "placeholder": "Task Name"}),
     )
     description = forms.CharField(
-        label="Dsecription",
+        label="Description",
         required=False,
-        widget=forms.TextInput(attrs={"class": "input input-bordered", "placeholder": "Task Dsecription"}),
+        widget=forms.TextInput(attrs={"class": "input input-bordered", "placeholder": "Task Description"}),
     )
     task_type = forms.CharField(
         label="Task Type",
