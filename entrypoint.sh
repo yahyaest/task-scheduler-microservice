@@ -44,12 +44,12 @@ done
 # run the workers in background
 for i in $(seq 1 $CELERY_WORKERS_COUNT)
 do
-        nohup celery -A $CELERY_WORKER_PROJECT_NAME worker --pool=gevent --concurrency=$CELERY_WORKER_CONCURRENCY -l $CELERY_WORKER_LOG_LEVEL  --autoscale=$CELERY_WORKER_AUTOSCALE --without-gossip -Q celery -E -n worker$i@%h --pidfile ./celery-worker-%n.pid --logfile logs/worker-%n.txt &
+        nohup celery -A $CELERY_WORKER_PROJECT_NAME worker --pool=prefork --concurrency=$CELERY_WORKER_CONCURRENCY -l $CELERY_WORKER_LOG_LEVEL  --autoscale=$CELERY_WORKER_AUTOSCALE --without-gossip -Q celery -E -n worker$i@%h --pidfile ./celery-worker-%n.pid --logfile logs/worker-%n.txt &
 done
 # run the queued workers in background
 for queue in $(echo $CELERY_WORKERS_QUEUES | tr "," "\n")
 do
-        nohup celery -A $CELERY_WORKER_PROJECT_NAME worker --pool=gevent --concurrency=$CELERY_WORKER_CONCURRENCY -l $CELERY_WORKER_LOG_LEVEL  --autoscale=$CELERY_WORKER_AUTOSCALE --without-gossip -Q $queue -E -n worker_$queue@%h --pidfile ./celery-worker-$queue.pid --logfile logs/worker-$queue.txt &
+        nohup celery -A $CELERY_WORKER_PROJECT_NAME worker --pool=prefork --concurrency=$CELERY_WORKER_CONCURRENCY -l $CELERY_WORKER_LOG_LEVEL  --autoscale=$CELERY_WORKER_AUTOSCALE --without-gossip -Q $queue -E -n worker_$queue@%h --pidfile ./celery-worker-$queue.pid --logfile logs/worker-$queue.txt &
 done
 
 # run the scheduler in background
