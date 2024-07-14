@@ -35,7 +35,7 @@
     <span id="current-user-span" style="display: none">{{request.COOKIES.user|get_current_user_email}}</span>
     <nav class="navbar sticky top-0 z-50 bg-error">
       <div class="flex-1">
-        <a href="{% url 'home' %}" class="btn btn-ghost text-xl">Task Scheduler App</a>
+        <a href="{% url 'home' %}" class="btn btn-ghost text-xs md:text-xl">Task Scheduler App</a>
       </div>
       <div class="flex-none">
         {% comment %} Theme Dropdown {% endcomment %}
@@ -107,6 +107,7 @@
     <footer
       class="footer footer-center p-10 bg-error text-base-content rounded"
     >
+      {% comment %} 
       <nav class="grid grid-flow-col gap-4">
         <a class="link link-hover">About us</a>
         <a class="link link-hover">Contact</a>
@@ -152,9 +153,10 @@
               ></path>
             </svg></a>
         </div>
-      </nav>
+      </nav> 
+      {% endcomment %}
       <aside>
-        <p>Copyright © 2024 - All right reserved by ACME Industries Ltd</p>
+        <p>Copyright © 2024 - All right reserved</p>
       </aside>
     </footer>
 
