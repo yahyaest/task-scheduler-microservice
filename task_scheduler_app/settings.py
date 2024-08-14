@@ -30,19 +30,21 @@ SECRET_KEY = 'django-insecure-ztf^&y&c76y50@e7u!1p9$yva6znu9(zfza!$ihf5cv=tea9sv
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+# USE_X_FORWARDED_HOST = True
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CORS_ALLOW_ALL_ORIGINS = True
 
 # Settings from environment
 env = environ.Env(
     DATABASE_URL=(str, 'psql://postgres:postgres@postgres:5432/task-scheduler'),
-    GATEWAY_BASE_URL=(str, None),
+    BASE_URL=(str, None),
     CELERY_WORKER_TASKS=(str, None),
     CELERY_BROKER_URL=(str, 'redis://redis:6379'),
     CELERY_RESULT_BACKEND=(str, 'redis://redis:6379')
 )
 
 DATABASE_URL = env('DATABASE_URL')
-GATEWAY_BASE_URL = env('GATEWAY_BASE_URL')
+BASE_URL = env('BASE_URL')
 
 # Application definition
 

@@ -7,13 +7,13 @@ from task_scheduler_app.tools.helpers import logger
 
 class Gateway:
     def __init__(self) -> None:
-        self.gateway_base_url = settings.GATEWAY_BASE_URL
-        self.gateway_signin_url = f'{self.gateway_base_url}/api/auth/signin/'
-        self.gateway_signup_url = f'{self.gateway_base_url}/api/auth/signup/'
-        self.gateway_user_url = f'{self.gateway_base_url}/api/users/'
-        self.gateway_current_user_url = f'{self.gateway_base_url}/api/users/me/'
-        self.gateway_images_url = f'{self.gateway_base_url}/api/images/'
-        self.gateway_current_user_image_url = f'{self.gateway_base_url}/api/images/me/'
+        self.base_url = settings.BASE_URL
+        self.signin_url = f'{self.base_url}/api/auth/signin/'
+        self.signup_url = f'{self.base_url}/api/auth/signup/'
+        self.user_url = f'{self.base_url}/api/users/'
+        self.current_user_url = f'{self.base_url}/api/users/me/'
+        self.images_url = f'{self.base_url}/api/images/'
+        self.current_user_image_url = f'{self.base_url}/api/images/me/'
         self.token = None
 
     def register(self, data):

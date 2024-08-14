@@ -24,7 +24,7 @@ ENV=DEV
 
 gateway_ip=$(getent hosts gateway | awk '{ print $1 }')
 
-export GATEWAY_BASE_URL=http://$gateway_ip:3000
+export BASE_URL=http://$gateway_ip:3000
 export JWT_SECRET='super-secret'
 
 yes | python manage.py makemigrations > /dev/stderr

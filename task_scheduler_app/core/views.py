@@ -58,10 +58,10 @@ def login_page(request):
                 logger.info(f"current_user is : {current_user}")
 
                 response = HttpResponseRedirect('/')
-                # response.set_cookie("token", token)
-                # response.set_cookie("user", json.dumps(current_user))
-                response.set_cookie("token", token, secure=True, httponly=True)
-                response.set_cookie("user", json.dumps(current_user), secure=True, httponly=True)
+                response.set_cookie("token", token)
+                response.set_cookie("user", json.dumps(current_user))
+                # response.set_cookie("token", token, secure=True, httponly=True)
+                # response.set_cookie("user", json.dumps(current_user), secure=True, httponly=True)
                 return response
             else:
                 if error:

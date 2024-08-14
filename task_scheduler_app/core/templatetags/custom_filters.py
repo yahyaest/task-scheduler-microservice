@@ -26,7 +26,7 @@ def list_length(value):
 
 @register.filter()
 def get_gateway_url(value):
-    return settings.GATEWAY_BASE_URL
+    return settings.BASE_URL
 
 @register.filter()
 def get_user_image(value):

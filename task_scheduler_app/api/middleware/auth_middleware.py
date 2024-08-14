@@ -32,8 +32,8 @@ class JWTAuthMiddleware:
             # user_email = decoded_token['email']
 
             # Make a request to the gateway app
-            gateway_base_url = settings.GATEWAY_BASE_URL
-            gateway_users_url = f'{gateway_base_url}/api/users/{user_id}/'
+            base_url = settings.BASE_URL
+            gateway_users_url = f'{base_url}/api/users/{user_id}/'
             response = requests.get(gateway_users_url, headers={'Authorization': f'Bearer {token}'})
             current_user = response.json()
             current_user.pop('password')
