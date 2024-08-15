@@ -25,7 +25,7 @@ class Gateway:
             headers['Content-Type'] = 'application/json'
 
             payload = json.dumps(data)
-            r = requests.post(self.gateway_signup_url, verify=False, data=payload, headers= headers)
+            r = requests.post(self.signup_url, verify=False, data=payload, headers= headers)
             if r.status_code == 201:
                 res = r.json()
                 token = res['access_token']
@@ -49,7 +49,7 @@ class Gateway:
             headers['Content-Type'] = 'application/json'
 
             payload = json.dumps(data)
-            r = requests.post(self.gateway_signin_url, verify=False, data=payload, headers= headers)
+            r = requests.post(self.signin_url, verify=False, data=payload, headers= headers)
             if r.status_code == 200:
                 res = r.json()
                 token = res['access_token']
@@ -75,7 +75,7 @@ class Gateway:
             headers = {}
             headers['Content-Type'] = 'application/json'
             headers['Authorization'] = f'Bearer {self.token}'
-            current_user_url = f"{self.gateway_user_url}/?email={email}"
+            current_user_url = f"{self.user_url}/?email={email}"
 
             r = requests.get(current_user_url, headers=headers)
             if r.status_code == 200:
@@ -95,7 +95,7 @@ class Gateway:
             headers = {}
             headers['Content-Type'] = 'application/json'
             headers['Authorization'] = f'Bearer {self.token}'
-            r = requests.get(self.gateway_current_user_url, verify=False, headers= headers)
+            r = requests.get(self.current_user_url, verify=False, headers= headers)
             if r.status_code == 200:
                 user = r.json()
                 return user
@@ -113,7 +113,7 @@ class Gateway:
             headers = {}
             headers['Content-Type'] = 'application/json'
             headers['Authorization'] = f'Bearer {self.token}'
-            r = requests.get(self.gateway_current_user_image_url, verify=False, headers= headers)
+            r = requests.get(self.current_user_image_url, verify=False, headers= headers)
             if r.status_code == 200:
                 user_image = r.json()
                 return user_image
@@ -136,7 +136,7 @@ class Gateway:
 
             files = {'file': (image_file._name, image_file, image_file.content_type), 'username': (None, username)}
 
-            r = requests.post(self.gateway_images_url, headers=headers, files=files)
+            r = requests.post(self.images_url, headers=headers, files=files)
 
             if r.status_code == 201:
                 data = r.json()
