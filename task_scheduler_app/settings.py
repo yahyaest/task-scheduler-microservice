@@ -258,50 +258,59 @@ LOGGING = {
             'level': 'DEBUG',
             'formatter':'default'
         },
+        'file': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, './logs/task_scheduler' + str(datetime.date.today()) + '.log'),
+            'when': 'D',
+            'interval': 1,
+            # 'backupCount': 30,  # Optional: keeps the last 30 log files
+            'level': 'DEBUG',
+            'formatter':'default'
+        },
     },
     'loggers': {
         'django.request': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'INFO',
             'propagate': True,
         },
         'django.channels.server': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'INFO',
             'propagate': True,
         },
         # 'django.db.backends': {
-        #     'handlers': ['console'],
+        #     'handlers': ['console', 'file'],
         #     'level': 'DEBUG',
         #     'propagate': False,
         # },
         'django.server': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'INFO',
             'propagate': False,
         },
         'django': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'INFO',
             'propagate': False,
         },
         'Task-Scheduler': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'INFO',
             'propagate': False,
         },
         'py.warnings': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'INFO',
             'propagate': True,
         },
         'urllib3.connectionpool': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'INFO',
             'propagate': True,
         },
         'requests.packages.urllib3': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'INFO',
             'propagate': True,
         }
